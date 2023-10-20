@@ -1,3 +1,5 @@
+**NOTICE: If you have any Errors or Bugs -> Open an Issue or Contact me via Discord: voidyyz or E-Mail: admin@centrapi.net
+
 # NanoKontrolProfiler
 A Program to use multiple Profiles on one Nanokontrol (just like if you had two)
 
