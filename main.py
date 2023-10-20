@@ -1,13 +1,24 @@
 from math import ceil
+from time import sleep
+
 import mido
 import tkinter as tk
 import threading
 import json
 
+import configloader
+import variables
+from configloader import load_config, save_config
 from gui import MainView
-from variables import *
+from variables import config
 
 from developer_func import *
+
+tempconfig = load_config()
+
+config['trackdown'] = tempconfig['trackdown']
+config['trackup'] = tempconfig['trackup']
+config['excluded'] = tempconfig['excluded']
 
 # Specify the updated names of the source and destination MIDI ports
 source_port_name = "nanoKONTROL2"
@@ -24,33 +35,23 @@ except IndexError:
     exit(500)
 
 root = tk.Tk()
-root.title("MIDI Channel Display")
+root.title("Nanoprofiler")
 root.attributes('-topmost', True)
 
 main = MainView(root)
 main.pack(side="top", fill="both", expand=True)
 
 
-def load_config():
-    try:
-        with open('config.json') as f:
-            d = json.load(f)
-            print(d)
-    except FileNotFoundError as e:
-        log(e)
-
-
-load_config()
-
-
 # Function to update the channel display in the tkinter GUI
 def update_channel_display():
-
     if test_mode:
-        root.geometry("{}x{}".format(200, 500))
+        root.geometry("{}x{}".format(200, 250))
 
     while True:
         main.mainpage.channel_label.config(text=str(ceil(config['current_channel'])))
+        main.settingspage.trackup_lable.config(text=str(ceil(config['trackup'])))
+        main.settingspage.trackdown_lable.config(text=str(ceil(config['trackdown'])))
+        main.settingspage.current_warning.config(text=str(config['current_warning']))
         if test_mode:
             main.mainpage.trackdown_lable.config(text=str(ceil(config['trackdown'])))
             main.mainpage.trackup_lable.config(text=str(ceil(config['trackup'])))
@@ -84,25 +85,42 @@ def handle_midi_messages():
             if config['setup_trackdown']:
                 config['trackdown'] = data.control
                 config['setup_trackdown'] = False
+                config['current_warning'] = "Button " + str(data.control) + " was set \n as profile down button"
+                save_config()
 
             if config['setup_trackup']:
                 config['trackup'] = data.control
                 config['setup_trackup'] = False
+                config['current_warning'] = "Button " + str(data.control) + " was set \n as profile up button"
+                save_config()
 
-            if set_exclude:
-                trackdown = data.control
+            if config['set_exclude']:
+
+                if data.control not in config['excluded']:
+                    config['excluded'].append(data.control)
+                    config['current_warning'] = "Button " + str(data.control) + " is \n excluded"
+                else:
+                    config['current_warning'] = "Button " + str(data.control) + " is \n already excluded"
+                config['set_exclude'] = False
+                save_config()
 
             if is_setup_mode():
-                continue
+                log(config)
 
-            if data.control == config['trackdown'] and config['current_channel'] != 1 and not setup_trackdown:
+            if data.control == config['trackdown'] and config['current_channel'] != 1 and not config['setup_trackdown']:
                 config['current_channel'] -= 0.5
-            elif data.control == config['trackup'] and not setup_trackup:
+            elif data.control == config['trackup'] and not config['setup_trackup']:
                 config['current_channel'] += 0.5
-            elif data.control != config['trackdown'] and data.control != config['trackup']:
+            elif data.control in config['excluded']:
+                data.channel = int(1)
+                destination_port.send(data)
+                log(f"Received: {data}")
+
+            elif data.control != config['trackdown'] and data.control != config['trackup'] and not is_setup_mode():
                 data.channel = int(config['current_channel'])
-                print(f"Received: {data}")
+                log(f"Received: {data}")
                 destination_port.send(data)  # Forward received MIDI message
+
 
     except KeyboardInterrupt:
         pass
@@ -112,9 +130,8 @@ def handle_midi_messages():
         exit()
 
 
-
 def is_setup_mode():
-    if setup_trackup or setup_trackdown or set_exclude:
+    if config['setup_trackup'] or config['setup_trackdown'] or config['set_exclude']:
         return True
 
 
@@ -134,3 +151,4 @@ midi_thread.start()
 
 # Start the tkinter main loop
 root.mainloop()
+configloader.save_config()
