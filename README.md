@@ -6,6 +6,7 @@ A Program to use multiple Profiles on one Nanokontrol (just like if you had two)
 ## Requirements:
 - Python 3.8 or above
 - LoopMidi Installed (https://www.tobias-erichsen.de/software/loopmidi.html)
+- Have Microsoft Buildtools Installed (https://aka.ms/vs/17/release/vs_BuildTools.exe)
 
 ## Installation:
 1. In LoopMidi create a new Virtual Device called **pymid**
