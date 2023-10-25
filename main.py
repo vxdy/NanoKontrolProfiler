@@ -24,20 +24,22 @@ config['excluded'] = tempconfig['excluded']
 source_port_name = "nanoKONTROL2"
 destination_port_name = "pymid"
 
-#MAC Support
+# MAC Support
 try:
     import rtmidi
+
     vmidi_out = rtmidi.MidiOut()
     vmidi_out.open_virtual_port('pymid')
 except NotImplementedError as e:
     pass
-
 
 try:
     # Find exakt Midi Names
     korg_port_name = [s for s in mido.get_input_names() if source_port_name in s][0]
     virtual_port_name = [g for g in mido.get_output_names() if destination_port_name in g][0]
 except IndexError as e:
+    log(mido.get_input_names())
+    log(mido.get_output_names())
     log(e)
     log("Device not found")
     exit(500)
