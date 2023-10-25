@@ -41,6 +41,10 @@ try:
     korg_port_name = [s for s in mido.get_input_names() if source_port_name in s][0]
     virtual_port_name = [g for g in mido.get_output_names() if destination_port_name in g][0]
 except IndexError as e:
+    log([s for s in mido.get_input_names() if source_port_name in s]())
+    log([g for g in mido.get_output_names() if destination_port_name in g])
+    log(source_port_name)
+    log(destination_port_name)
     log(mido.get_input_names())
     log(mido.get_output_names())
     log(e)
