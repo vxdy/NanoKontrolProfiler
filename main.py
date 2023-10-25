@@ -21,7 +21,7 @@ config['trackup'] = tempconfig['trackup']
 config['excluded'] = tempconfig['excluded']
 
 # Specify the updated names of the source and destination MIDI ports
-source_port_name = "nanoKONTROL2"
+source_port_name = "IAC-Treiber pymid"
 destination_port_name = "pymid"
 
 # MAC Support
@@ -30,8 +30,6 @@ try:
 
     vmidi_out = rtmidi.MidiOut()
     vmidi_out.open_virtual_port('pymid')
-    vmidi_out2 = rtmidi.MidiOut()
-    vmidi_out2.open_virtual_port('IAC-Treiber pymid')
 except NotImplementedError as e:
     pass
 
