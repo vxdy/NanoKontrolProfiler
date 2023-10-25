@@ -21,8 +21,10 @@ config['trackup'] = tempconfig['trackup']
 config['excluded'] = tempconfig['excluded']
 
 # Specify the updated names of the source and destination MIDI ports
-source_port_name = "IAC-Treiber pymid"
-destination_port_name = "pymid"
+source_port_name = "pymid"
+destination_port_name = "IAC-Treiber pymid"
+
+isMacOS = False
 
 # MAC Support
 try:
@@ -30,6 +32,7 @@ try:
 
     vmidi_out = rtmidi.MidiOut()
     vmidi_out.open_virtual_port('pymid')
+    isMacOS = True
 except NotImplementedError as e:
     pass
 
