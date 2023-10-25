@@ -22,10 +22,14 @@ config['trackup'] = tempconfig['trackup']
 config['excluded'] = tempconfig['excluded']
 
 # Specify the updated names of the source and destination MIDI ports
-source_port_name = "IAC-Treiber pymid"
+source_port_name = "nanoKONTROL2"
 destination_port_name = "pymid"
 
 isMacOS = False
+
+#GUI Variables
+guiWidth = 250
+guiHight = 250
 
 # MAC Support
 try:
@@ -52,23 +56,25 @@ root = tk.Tk()
 root.title("Nanoprofiler")
 root.attributes('-topmost', True)
 
+
 main = MainView(root)
 main.pack(side="top", fill="both", expand=True)
 
 
 # Function to update the channel display in the tkinter GUI
 def update_channel_display():
-    if DEVELOPER_MODE:
-        root.geometry("{}x{}".format(200, 250))
+
+    root.geometry("{}x{}".format(guiWidth, guiHight))
+    root.configure(bg="#2D2D2D")
 
     while True:
-        main.mainpage.channel_label.config(text=str(ceil(config['current_channel'])))
-        main.settingspage.trackup_lable.config(text=str(ceil(config['trackup'])))
-        main.settingspage.trackdown_lable.config(text=str(ceil(config['trackdown'])))
-        main.settingspage.current_warning.config(text=str(config['current_warning']))
-        if DEVELOPER_MODE:
-            main.mainpage.trackdown_lable.config(text=str(ceil(config['trackdown'])))
-            main.mainpage.trackup_lable.config(text=str(ceil(config['trackup'])))
+        #main.mainpage.channel_label.config(text=str(ceil(config['current_channel'])))
+        #main.settingspage.trackup_lable.config(text=str(ceil(config['trackup'])))
+        #main.settingspage.trackdown_lable.config(text=str(ceil(config['trackdown'])))
+        #main.settingspage.current_warning.config(text=str(config['current_warning']))
+        #if DEVELOPER_MODE:
+        #    main.mainpage.trackdown_lable.config(text=str(ceil(config['trackdown'])))
+        #    main.mainpage.trackup_lable.config(text=str(ceil(config['trackup'])))
         root.update()
 
 
@@ -157,12 +163,13 @@ def is_setup_mode():
 
 # Create threads for GUI update and MIDI handling
 gui_thread = threading.Thread(target=update_channel_display)
-midi_thread = threading.Thread(target=handle_midi_messages)
+#midi_thread = threading.Thread(target=handle_midi_messages)
 
 # Start both threads
 gui_thread.start()
-midi_thread.start()
+#midi_thread.start()
 
 # Start the tkinter main loop
 root.mainloop()
+root.resizable(False, False)
 configloader.save_config()
