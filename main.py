@@ -24,7 +24,14 @@ config['excluded'] = tempconfig['excluded']
 source_port_name = "nanoKONTROL2"
 destination_port_name = "pymid"
 
-output = mido.open_output()
+#MAC Support
+try:
+    import rtmidi
+    vmidi_out = rtmidi.MidiOut()
+    vmidi_out.open_virtual_port('pymid')
+except NotImplementedError as e:
+    pass
+
 
 try:
     # Find exakt Midi Names
