@@ -21,7 +21,7 @@ config['trackup'] = tempconfig['trackup']
 config['excluded'] = tempconfig['excluded']
 
 # Specify the updated names of the source and destination MIDI ports
-source_port_name = "pymid"
+source_port_name = "nanoKONTROL2"
 destination_port_name = "IAC-Treiber pymid"
 
 isMacOS = False
