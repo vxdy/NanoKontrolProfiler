@@ -1,6 +1,11 @@
-test_mode = True
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DEVELOPER_MODE = os.getenv("DEVELOPER_MODE", 'False').lower() in ('true', '1', 't')
 
 
 def log(output):
-    if test_mode:
+    if DEVELOPER_MODE:
         print(output)

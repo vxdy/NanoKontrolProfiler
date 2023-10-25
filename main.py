@@ -1,3 +1,4 @@
+import os
 from math import ceil
 from time import sleep
 
@@ -21,8 +22,8 @@ config['trackup'] = tempconfig['trackup']
 config['excluded'] = tempconfig['excluded']
 
 # Specify the updated names of the source and destination MIDI ports
-source_port_name = "pymid"
-destination_port_name = "IAC-Treiber pymid"
+source_port_name = "IAC-Treiber pymid"
+destination_port_name = "pymid"
 
 isMacOS = False
 
@@ -41,10 +42,6 @@ try:
     korg_port_name = [s for s in mido.get_input_names() if source_port_name in s][0]
     virtual_port_name = [g for g in mido.get_output_names() if destination_port_name in g][0]
 except IndexError as e:
-    log([s for s in mido.get_input_names() if source_port_name in s]())
-    log([g for g in mido.get_output_names() if destination_port_name in g])
-    log(source_port_name)
-    log(destination_port_name)
     log(mido.get_input_names())
     log(mido.get_output_names())
     log(e)
@@ -61,7 +58,7 @@ main.pack(side="top", fill="both", expand=True)
 
 # Function to update the channel display in the tkinter GUI
 def update_channel_display():
-    if test_mode:
+    if DEVELOPER_MODE:
         root.geometry("{}x{}".format(200, 250))
 
     while True:
@@ -69,7 +66,7 @@ def update_channel_display():
         main.settingspage.trackup_lable.config(text=str(ceil(config['trackup'])))
         main.settingspage.trackdown_lable.config(text=str(ceil(config['trackdown'])))
         main.settingspage.current_warning.config(text=str(config['current_warning']))
-        if test_mode:
+        if DEVELOPER_MODE:
             main.mainpage.trackdown_lable.config(text=str(ceil(config['trackdown'])))
             main.mainpage.trackup_lable.config(text=str(ceil(config['trackup'])))
         root.update()

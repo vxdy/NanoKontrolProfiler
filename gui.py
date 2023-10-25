@@ -4,7 +4,7 @@ from math import ceil
 from configloader import save_config
 from variables import config
 
-from developer_func import test_mode, log
+from developer_func import DEVELOPER_MODE, log
 
 
 def reset_channel():
