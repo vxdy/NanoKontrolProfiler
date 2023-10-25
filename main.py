@@ -31,7 +31,7 @@ try:
     vmidi_out = rtmidi.MidiOut()
     vmidi_out.open_virtual_port('pymid')
     vmidi_out2 = rtmidi.MidiOut()
-    vmidi_out2.open_virtual_port('nanoKONTROL2')
+    vmidi_out2.open_virtual_port('IAC-Treiber pymid')
 except NotImplementedError as e:
     pass
 
