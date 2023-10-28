@@ -20,6 +20,7 @@ tempconfig = load_config()
 config['trackdown'] = tempconfig['trackdown']
 config['trackup'] = tempconfig['trackup']
 config['excluded'] = tempconfig['excluded']
+config['current_channel'] = tempconfig['current_channel']
 
 # Specify the updated names of the source and destination MIDI ports
 source_port_name = "nanoKONTROL2"
@@ -123,13 +124,11 @@ def handle_midi_messages():
                 config['set_exclude'] = False
                 save_config()
 
-            if is_setup_mode():
-                log(config)
-
             if data.control == config['trackdown'] and config['current_channel'] != 1 and not config['setup_trackdown']:
                 config['current_channel'] -= 0.5
-            elif data.control == config['trackup'] and not config['setup_trackup']:
+            elif data.control == config['trackup'] and not config['setup_trackup'] and config['current_channel'] < 15:
                 config['current_channel'] += 0.5
+            # Forward on Channel 1 if Button is Excluded
             elif data.control in config['excluded']:
                 data.channel = int(1)
                 destination_port.send(data)
@@ -139,7 +138,6 @@ def handle_midi_messages():
                 data.channel = int(config['current_channel'])
                 log(f"Received: {data}")
                 destination_port.send(data)  # Forward received MIDI message
-
 
     except KeyboardInterrupt:
         pass
@@ -153,11 +151,6 @@ def is_setup_mode():
     if config['setup_trackup'] or config['setup_trackdown'] or config['set_exclude']:
         return True
 
-
-# Create a tkinter window
-
-
-# Create a label to display the current channel value
 
 
 # Create threads for GUI update and MIDI handling
