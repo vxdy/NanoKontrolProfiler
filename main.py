@@ -3,6 +3,7 @@ from time import sleep
 
 import mido
 import tkinter as tk
+import customtkinter
 import threading
 import json
 
@@ -22,7 +23,7 @@ config['excluded'] = tempconfig['excluded']
 
 # Specify the updated names of the source and destination MIDI ports
 source_port_name = "nanoKONTROL2"
-destination_port_name = "IAC-Treiber pymid"
+destination_port_name = "pymid"
 
 isMacOS = False
 
@@ -33,6 +34,7 @@ try:
     vmidi_out = rtmidi.MidiOut()
     vmidi_out.open_virtual_port('pymid')
     isMacOS = True
+    destination_port_name = "IAC-Treiber pymid"
 except NotImplementedError as e:
     pass
 
@@ -41,8 +43,6 @@ try:
     korg_port_name = [s for s in mido.get_input_names() if source_port_name in s][0]
     virtual_port_name = [g for g in mido.get_output_names() if destination_port_name in g][0]
 except IndexError as e:
-    log([s for s in mido.get_input_names() if source_port_name in s]())
-    log([g for g in mido.get_output_names() if destination_port_name in g])
     log(source_port_name)
     log(destination_port_name)
     log(mido.get_input_names())
@@ -51,7 +51,10 @@ except IndexError as e:
     log("Device not found")
     exit(500)
 
-root = tk.Tk()
+customtkinter.set_appearance_mode("system")  # Modes: system (default), light, dark
+customtkinter.set_default_color_theme("green")
+
+root = customtkinter.CTk()
 root.title("Nanoprofiler")
 root.attributes('-topmost', True)
 
@@ -61,17 +64,16 @@ main.pack(side="top", fill="both", expand=True)
 
 # Function to update the channel display in the tkinter GUI
 def update_channel_display():
-    if test_mode:
-        root.geometry("{}x{}".format(200, 250))
+    log(config['current_height'])
 
     while True:
-        main.mainpage.channel_label.config(text=str(ceil(config['current_channel'])))
-        main.settingspage.trackup_lable.config(text=str(ceil(config['trackup'])))
-        main.settingspage.trackdown_lable.config(text=str(ceil(config['trackdown'])))
-        main.settingspage.current_warning.config(text=str(config['current_warning']))
-        if test_mode:
-            main.mainpage.trackdown_lable.config(text=str(ceil(config['trackdown'])))
-            main.mainpage.trackup_lable.config(text=str(ceil(config['trackup'])))
+        root.geometry("{}x{}".format(config['current_width'], config['current_height']))
+
+        main.mainpage.channel_label.configure(text=str(ceil(config['current_channel'])))
+        main.settingspage.trackup_lable.configure(text=str(ceil(config['trackup'])))
+        main.settingspage.trackdown_lable.configure(text=str(ceil(config['trackdown'])))
+        main.settingspage.current_warning.configure(text=str(config['current_warning']))
+
         root.update()
 
 
