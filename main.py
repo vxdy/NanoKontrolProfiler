@@ -3,6 +3,7 @@ from time import sleep
 
 import mido
 import tkinter as tk
+import customtkinter
 import threading
 import json
 
@@ -19,22 +20,42 @@ tempconfig = load_config()
 config['trackdown'] = tempconfig['trackdown']
 config['trackup'] = tempconfig['trackup']
 config['excluded'] = tempconfig['excluded']
+config['current_channel'] = tempconfig['current_channel']
 
 # Specify the updated names of the source and destination MIDI ports
 source_port_name = "nanoKONTROL2"
 destination_port_name = "pymid"
 
-output = mido.open_output()
+isMacOS = False
+
+# MAC Support
+try:
+    import rtmidi
+
+    vmidi_out = rtmidi.MidiOut()
+    vmidi_out.open_virtual_port('pymid')
+    isMacOS = True
+    destination_port_name = "IAC-Treiber pymid"
+except NotImplementedError as e:
+    pass
 
 try:
     # Find exakt Midi Names
     korg_port_name = [s for s in mido.get_input_names() if source_port_name in s][0]
     virtual_port_name = [g for g in mido.get_output_names() if destination_port_name in g][0]
-except IndexError:
+except IndexError as e:
+    log(source_port_name)
+    log(destination_port_name)
+    log(mido.get_input_names())
+    log(mido.get_output_names())
+    log(e)
     log("Device not found")
     exit(500)
 
-root = tk.Tk()
+customtkinter.set_appearance_mode("system")  # Modes: system (default), light, dark
+customtkinter.set_default_color_theme("green")
+
+root = customtkinter.CTk()
 root.title("Nanoprofiler")
 root.attributes('-topmost', True)
 
@@ -44,17 +65,16 @@ main.pack(side="top", fill="both", expand=True)
 
 # Function to update the channel display in the tkinter GUI
 def update_channel_display():
-    if test_mode:
-        root.geometry("{}x{}".format(200, 250))
+    log(config['current_height'])
 
     while True:
-        main.mainpage.channel_label.config(text=str(ceil(config['current_channel'])))
-        main.settingspage.trackup_lable.config(text=str(ceil(config['trackup'])))
-        main.settingspage.trackdown_lable.config(text=str(ceil(config['trackdown'])))
-        main.settingspage.current_warning.config(text=str(config['current_warning']))
-        if test_mode:
-            main.mainpage.trackdown_lable.config(text=str(ceil(config['trackdown'])))
-            main.mainpage.trackup_lable.config(text=str(ceil(config['trackup'])))
+        root.geometry("{}x{}".format(config['current_width'], config['current_height']))
+
+        main.mainpage.channel_label.configure(text=str(ceil(config['current_channel'])))
+        main.settingspage.trackup_lable.configure(text=str(ceil(config['trackup'])))
+        main.settingspage.trackdown_lable.configure(text=str(ceil(config['trackdown'])))
+        main.settingspage.current_warning.configure(text=str(config['current_warning']))
+
         root.update()
 
 
@@ -104,13 +124,11 @@ def handle_midi_messages():
                 config['set_exclude'] = False
                 save_config()
 
-            if is_setup_mode():
-                log(config)
-
             if data.control == config['trackdown'] and config['current_channel'] != 1 and not config['setup_trackdown']:
                 config['current_channel'] -= 0.5
-            elif data.control == config['trackup'] and not config['setup_trackup']:
+            elif data.control == config['trackup'] and not config['setup_trackup'] and config['current_channel'] < 15:
                 config['current_channel'] += 0.5
+            # Forward on Channel 1 if Button is Excluded
             elif data.control in config['excluded']:
                 data.channel = int(1)
                 destination_port.send(data)
@@ -120,7 +138,6 @@ def handle_midi_messages():
                 data.channel = int(config['current_channel'])
                 log(f"Received: {data}")
                 destination_port.send(data)  # Forward received MIDI message
-
 
     except KeyboardInterrupt:
         pass
@@ -134,11 +151,6 @@ def is_setup_mode():
     if config['setup_trackup'] or config['setup_trackdown'] or config['set_exclude']:
         return True
 
-
-# Create a tkinter window
-
-
-# Create a label to display the current channel value
 
 
 # Create threads for GUI update and MIDI handling

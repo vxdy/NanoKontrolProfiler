@@ -12,8 +12,9 @@ def save_config():
             tempconfig['setup_trackdown'] = False
             tempconfig['setup_trackup'] = False
             tempconfig['set_exclude'] = False
-            tempconfig['set_exclude'] = config['current_channel']
+            tempconfig['excluded'] = config['excluded']
             tempconfig['current_warning'] = ""
+            tempconfig['current_channel'] = config['current_channel']
 
             f.write(json.dumps(tempconfig))
 
